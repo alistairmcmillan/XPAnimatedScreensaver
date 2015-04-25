@@ -16,14 +16,14 @@ If you want the default account to use this screensaver then run the included "s
 
 HISTORY
 -------
-Version 1.2 - 23 February 03
+Version 1.2 - 23 February 2003
 - Removed blank space to right of Windows signage in images.
 - Added graphic for non XP Pro/Home systems.
 - Added Windows version detection code.
 - Added code to validate data retrieved from registry.
 
-Version 1.1 - 05 January 02
+Version 1.1 - 05 January 2002
 - Changed the "Config" dialog to use trackbars instead of editboxes.
 
-Version 1 - 04 January 02
+Version 1 - 04 January 2002
 - Original release.
