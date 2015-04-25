@@ -1,5 +1,5 @@
-XP ANIMATED SCREENSAVER v1.2
-----------------------------
+XP ANIMATED SCREENSAVER
+-----------------------
 I got bored with the default screensaver that comes with Windows XP, that displays a static image of the Windows XP signage on different parts of the screen. So I created this  version that is animated.  Still boring, but at least a little improvement than the Microsoft version.
 
 INSTALL
