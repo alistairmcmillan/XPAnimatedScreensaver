@@ -1,0 +1,8 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_USERS\.DEFAULT\Control Panel\Desktop]
+"SCRNSAVE.EXE"="XP Animated.scr"
+
+[HKEY_USERS\.DEFAULT\Control Panel\Screen Saver.XP Animated]
+"image"=dword:00000002
+"delay"=dword:00000003
