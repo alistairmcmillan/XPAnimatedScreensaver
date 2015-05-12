@@ -5,6 +5,12 @@
 #include <string.h>
 #include "Screensaver.h"
 #include <time.h>
+#include <gdiplus.h>
+#include "CGdiPlusBitmap.h"
+
+using namespace Gdiplus;
+
+#pragma comment(lib, "gdiplus.lib")
 
 #define DELAYMAX 5
 #define IMAGEMAX 4
@@ -16,25 +22,77 @@ long image = 2;
 long delay = 3;
 
 unsigned long datatype, datasize;
-//unsigned long result;
 DWORD result;
 
 HKEY hRegKey;
 
+static RECT scrdim;
+static HDC hMemDC;
+static int X1 = 0, Y1 = 0, bitmap_width, bitmap_height;
+static BOOL headingright = 1, headingdown = 0, collision = 0;
+static HBITMAP hBitmap;
+
+VOID ClearDC(HDC hDC) {
+	Graphics graphics(hDC);
+	graphics.Clear(Color::Black);
+}
+
+VOID OnPaint(HDC hDC) {
+	Graphics graphics(hDC);
+	BitBlt(hDC, 0, 0, scrdim.right, scrdim.bottom, hMemDC, 0, 0, SRCCOPY);
+}
+
+VOID OnTimer(HDC hDC) {
+	Graphics graphics(hMemDC);
+
+	// Paint black where the flag last was
+	SolidBrush* blackBrush = new SolidBrush(Color::Black);
+	graphics.FillRectangle(blackBrush, X1, Y1, bitmap_width, bitmap_height);
+
+	// checks image for collission with side of screen
+	if ((headingright) && (scrdim.right < (X1 + bitmap_width))) {				// right
+		headingright = 0;
+		collision = 1;
+	}
+	if ((!headingright) && (X1 < 0)) {											// left
+		headingright = 1;
+		collision = 1;
+	}
+	if ((headingdown) && (scrdim.bottom < (Y1 + bitmap_height)))	{			// bottom
+		headingdown = 0;
+		collision = 1;
+	}
+	if ((!headingdown) && (Y1 < 0)) {											// top
+		headingdown = 1;
+		collision = 1;
+	}
+
+	// moves image in whatever direction
+	if (headingdown) Y1 += 2; else Y1 -= 2;
+	if (headingright) X1 += 2; else X1 -= 2;
+
+	// draws image
+	CGdiPlusBitmapResource* pBitmap = new CGdiPlusBitmapResource;
+	pBitmap->Load("IDB_XPPRO", "PNG");
+	graphics.DrawImage(*pBitmap, X1, Y1, bitmap_width, bitmap_height);
+	delete pBitmap;
+}
+
 LRESULT WINAPI ScreenSaverProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	static HDC hDC, hMemDC, hBitDC;
+	static HDC hDC;
 	static HINSTANCE hInst = GetModuleHandle(NULL);
 	static unsigned int timer;
-	static RECT scrdim;
-	static HBRUSH hBlkBrush;
-	static HBITMAP hBitmap, hImage1, hImage2;
 	static SIZE size;
-	static int X1 = 0, Y1 = 0, bitmap_width, bitmap_height;
 	static PAINTSTRUCT ps;
-	static bool headingright1 = 1, headingdown1 = 0, headingright2 = 0, headingdown2 = 1, collision = 0;
 
-	switch(message) {
+	ULONG_PTR m_gdiplusToken;
+	GdiplusStartupInput gdiplusStartupInput;
+	GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
+
+	SolidBrush* blackBrush;
+
+	switch (message) {
 		case WM_CREATE:
 
 			// Sets up or creates registry entry as required
@@ -53,13 +111,15 @@ LRESULT WINAPI ScreenSaverProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
 			// Gets the size of the screen
 			// Sets bitmap height and width which is determined from the size of the screen
-			// Sets timer
-			// Creates black brush
 			GetClientRect(hWnd, &scrdim);
 			bitmap_width = scrdim.right/(10/image);
-			bitmap_height = (int)(bitmap_width/1.58);
-			timer = SetTimer(hWnd, 1, (1+(delay-1)*(delay-1)*(delay-1)), NULL);
-			hBlkBrush = (HBRUSH) GetStockObject(BLACK_BRUSH);
+			bitmap_height = (int)(bitmap_width/1.41);
+
+			// Sets timer
+			timer = SetTimer(hWnd, 1, (1 + (delay - 1)*(delay - 1)*(delay - 1)), NULL);
+
+			// Creates black brush
+			blackBrush = new SolidBrush(Color::Black);
 
 			// Seeds random number generator with the time
 			srand( (unsigned)time( NULL ) );
@@ -73,16 +133,12 @@ LRESULT WINAPI ScreenSaverProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			// Creates compatible bitmap in hBitmap
 			// Sets hMemDC to be the same as hDC
 			hDC = GetDC(hWnd);
-			hBitDC = CreateCompatibleDC(hDC);
 			hMemDC = CreateCompatibleDC(hDC);
 			hBitmap = CreateCompatibleBitmap(hDC, scrdim.right, scrdim.bottom);
 			SelectObject(hMemDC, hBitmap);
 
-			// Load the XP bitmaps
-			hImage1 = (HBITMAP)LoadImage(hInst, MAKEINTRESOURCE(IDB_XP), IMAGE_BITMAP,bitmap_width,bitmap_height,LR_DEFAULTSIZE);
-			
-			SelectObject(hMemDC, hBlkBrush);
-			PatBlt(hMemDC, 0, 0, scrdim.right, scrdim.bottom, PATCOPY);
+			// Clear screen
+			ClearDC(hMemDC);
 
 			ReleaseDC(hWnd, hDC);
 			break;
@@ -91,51 +147,21 @@ LRESULT WINAPI ScreenSaverProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			break;
 
 		case WM_TIMER:
-			hDC = GetDC(hWnd);
-
-			SelectObject(hMemDC, hBlkBrush);
-			PatBlt(hMemDC, X1, Y1, bitmap_width, bitmap_height, PATCOPY);
-
-			// checks image1 for collission with side of screen
-			if ((headingright1) && (scrdim.right < (X1 + bitmap_width))) {				// right
-				headingright1 = 0;
-				collision = 1;
-			}
-			if ((!headingright1) && (X1 < 0)) {											// left
-				headingright1 = 1;
-				collision = 1;
-			}
-			if ((headingdown1) && (scrdim.bottom < (Y1 + bitmap_height)))	{			// bottom
-				headingdown1 = 0;
-				collision = 1;
-			}
-			if ((!headingdown1) && (Y1 < 0)) {											// top
-				headingdown1 = 1;
-				collision = 1;
-			}
-
-			// moves image1 in whatever direction
-			if (headingdown1) Y1 += 2; else Y1 -= 2;
-			if (headingright1) X1 += 2; else X1 -= 2;
-
-			// draws image
-			SelectObject(hBitDC, hImage1);
-			BitBlt(hMemDC, X1, Y1, bitmap_width, bitmap_height, hBitDC, 0, 0, SRCCOPY);
+			hDC = BeginPaint(hWnd, &ps);
+			OnTimer(hDC);
+			EndPaint(hWnd, &ps);
 
 			InvalidateRect(hWnd, NULL, 1);
-			ReleaseDC(hWnd, hDC);
 			break;
 
 		case WM_PAINT:
 			hDC = BeginPaint(hWnd, &ps);
-
-			BitBlt(hDC, 0, 0, scrdim.right, scrdim.bottom, hMemDC, 0, 0, SRCCOPY);
-
+			OnPaint(hDC);
 			EndPaint(hWnd, &ps);
 			break;
 
 		case WM_DESTROY:
-			DeleteObject(hImage1);
+			GdiplusShutdown(m_gdiplusToken);
 			DeleteDC(hMemDC);
 			KillTimer(hWnd, timer);
 			break;

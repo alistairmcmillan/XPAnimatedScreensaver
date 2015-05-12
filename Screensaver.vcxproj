@@ -124,16 +124,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Image Include="bitmap.bmp" />
     <Image Include="gla.ico" />
-    <Image Include="glasgow25.bmp" />
-    <Image Include="home.bmp" />
-    <Image Include="pro.bmp" />
+    <Image Include="home.png" />
+    <Image Include="pro.png" />
     <Image Include="xp.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Media Include="boink1.wav" />
-    <Media Include="Windows XP Ding.wav" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="default1.bin" />
@@ -143,6 +137,9 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Screensaver.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CGdiPlusBitmap.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

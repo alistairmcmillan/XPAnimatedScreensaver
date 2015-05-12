@@ -126,7 +126,7 @@ END
 // Bitmap
 //
 
-IDB_XP                  BITMAP  DISCARDABLE     "pro.bmp"
+IDB_XPPRO               PNG                     "pro.png"
 
 /////////////////////////////////////////////////////////////////////////////
 //
