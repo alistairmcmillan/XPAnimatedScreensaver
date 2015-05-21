@@ -32,6 +32,8 @@ static int X1 = 0, Y1 = 0, bitmap_width, bitmap_height;
 static BOOL headingright = 1, headingdown = 0, collision = 0;
 static HBITMAP hBitmap;
 
+CGdiPlusBitmapResource* pBitmap;
+
 VOID ClearDC(HDC hDC) {
 	Graphics graphics(hDC);
 	graphics.Clear(Color::Black);
@@ -72,10 +74,7 @@ VOID OnTimer(HDC hDC) {
 	if (headingright) X1 += 2; else X1 -= 2;
 
 	// draws image
-	CGdiPlusBitmapResource* pBitmap = new CGdiPlusBitmapResource;
-	pBitmap->Load("IDB_XPPRO", "PNG");
 	graphics.DrawImage(*pBitmap, X1, Y1, bitmap_width, bitmap_height);
-	delete pBitmap;
 }
 
 LRESULT WINAPI ScreenSaverProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -96,7 +95,7 @@ LRESULT WINAPI ScreenSaverProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		case WM_CREATE:
 
 			// Sets up or creates registry entry as required
-			if (RegCreateKeyEx(HKEY_CURRENT_USER, "Control Panel\\Screen Saver.XP Animated", 0, "ScreenSaver", 0, KEY_ALL_ACCESS, NULL, &hRegKey, &result) == ERROR_SUCCESS) {
+			if (RegCreateKeyEx(HKEY_CURRENT_USER, "Control Panel\\Screen Saver.XP Animated", 0, NULL, 0, KEY_ALL_ACCESS, NULL, &hRegKey, &result) == ERROR_SUCCESS) {
 				if (result == REG_CREATED_NEW_KEY) {					// creates key if doesn't exist
 					RegSetValueEx(hRegKey, "image", 0, REG_DWORD, (LPBYTE)&image, sizeof(DWORD));
 					RegSetValueEx(hRegKey, "delay", 0, REG_DWORD, (LPBYTE)&delay, sizeof(DWORD));
@@ -117,6 +116,10 @@ LRESULT WINAPI ScreenSaverProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
 			// Sets timer
 			timer = SetTimer(hWnd, 1, (1 + (delay - 1)*(delay - 1)*(delay - 1)), NULL);
+
+			// Load image
+			pBitmap = new CGdiPlusBitmapResource;
+			pBitmap->Load("IDB_XPPRO", "PNG");
 
 			// Creates black brush
 			blackBrush = new SolidBrush(Color::Black);
@@ -161,6 +164,8 @@ LRESULT WINAPI ScreenSaverProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			break;
 
 		case WM_DESTROY:
+			delete pBitmap;
+
 			GdiplusShutdown(m_gdiplusToken);
 			DeleteDC(hMemDC);
 			KillTimer(hWnd, timer);
@@ -210,7 +215,7 @@ BOOL WINAPI ScreenSaverConfigureDialog(HWND hdWnd, UINT message, WPARAM wParam, 
 			hbXPBlue = CreateSolidBrush( RGB( 18, 78, 70 ));
 
 			// Sets up or creates registry entry for current user
-			if (RegCreateKeyEx(HKEY_CURRENT_USER, "Control Panel\\Screen Saver.XP Animated", 0, "ScreenSaver", 0, KEY_ALL_ACCESS, NULL, &hRegKey, &result) == ERROR_SUCCESS) {
+			if (RegCreateKeyEx(HKEY_CURRENT_USER, "Control Panel\\Screen Saver.XP Animated", 0, NULL, 0, KEY_ALL_ACCESS, NULL, &hRegKey, &result) == ERROR_SUCCESS) {
 				if (result == REG_CREATED_NEW_KEY) {					// creates key if doesn't exist
 					RegSetValueEx(hRegKey, "image", 0, REG_DWORD, (LPBYTE)&image, sizeof(DWORD));
 					RegSetValueEx(hRegKey, "delay", 0, REG_DWORD, (LPBYTE)&delay, sizeof(DWORD));
@@ -251,7 +256,7 @@ BOOL WINAPI ScreenSaverConfigureDialog(HWND hdWnd, UINT message, WPARAM wParam, 
 					image = SendMessage(hdSizeSlider, TBM_GETPOS, 0, 0);
 					delay = SendMessage(hdSpeedSlider, TBM_GETPOS, 0, 0);
 
-					if (RegCreateKeyEx(HKEY_CURRENT_USER, "Control Panel\\Screen Saver.XP Animated", 0, "ScreenSaver", 0, KEY_ALL_ACCESS, NULL, &hRegKey, &result) == ERROR_SUCCESS) {
+					if (RegCreateKeyEx(HKEY_CURRENT_USER, "Control Panel\\Screen Saver.XP Animated", 0, NULL, 0, KEY_ALL_ACCESS, NULL, &hRegKey, &result) == ERROR_SUCCESS) {
 						RegSetValueEx(hRegKey, "image", 0, REG_DWORD, (LPBYTE)&image, sizeof(DWORD));
 						RegSetValueEx(hRegKey, "delay", 0, REG_DWORD, (LPBYTE)&delay, sizeof(DWORD));
 						RegCloseKey(hRegKey);
