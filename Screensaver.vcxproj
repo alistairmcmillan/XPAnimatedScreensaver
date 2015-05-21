@@ -124,8 +124,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Image Include="gla.ico" />
-    <Image Include="home.png" />
     <Image Include="pro.png" />
     <Image Include="xp.ico" />
   </ItemGroup>
