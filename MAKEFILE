@@ -1,0 +1,18 @@
+CFLAGS = /I"C:\Program Files\Microsoft SDKs\Windows\v7.0\Include" /c
+LFLAGS = /libpath:"C:\Program Files\Microsoft SDKs\Windows\v7.0\Lib" /subsystem:windows
+
+TARGET = screensaver.scr
+
+SOURCES = \
+		Screensaver.cpp
+
+all: $(TARGET)
+
+clean:
+		erase $(TARGET)
+		erase *.obj
+
+$(TARGET):$(SOURCES)
+		cl $(CFLAGS) $**
+		windres Screensaver.rc Resources.obj
+		link $(LFLAGS) /out:$(TARGET) Screensaver.obj Resources.obj
