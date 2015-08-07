@@ -1,3 +1,7 @@
+// cl /I"C:\Program Files\Microsoft SDKs\Windows\v7.0\Include" /c Screensaver.cpp
+// windres Screensaver.rc Resources.obj
+// link /libpath:"C:\Program Files\Microsoft SDKs\Windows\v7.0\Lib" /subsystem:windows /out:"Screensaver.scr" Screensaver.obj Resources.obj
+
 #include <windows.h>
 #include <scrnsave.h>
 #include <commctrl.h>
@@ -10,6 +14,14 @@
 
 using namespace Gdiplus;
 
+#pragma comment(lib, "kernel32.lib")
+#pragma comment(lib, "user32.lib")
+#pragma comment(lib, "shell32.lib")
+#pragma comment(lib, "comctl32.lib")
+#pragma comment(lib, "ole32.lib")
+#pragma comment(lib, "advapi32.lib")
+#pragma comment(lib, "gdi32.lib")
+#pragma comment(lib, "scrnsave.lib")
 #pragma comment(lib, "gdiplus.lib")
 
 #define DELAYMAX 5
