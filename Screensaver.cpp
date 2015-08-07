@@ -1,3 +1,4 @@
+// "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\vcvars32.bat"
 // cl /I"C:\Program Files\Microsoft SDKs\Windows\v7.0\Include" /c Screensaver.cpp
 // windres Screensaver.rc Resources.obj
 // link /libpath:"C:\Program Files\Microsoft SDKs\Windows\v7.0\Lib" /subsystem:windows /out:"Screensaver.scr" Screensaver.obj Resources.obj
